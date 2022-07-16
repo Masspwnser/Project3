@@ -1,51 +1,69 @@
 package beans;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.rowset.*;
 import com.mysql.cj.jdbc.MysqlDataSource;
+import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class GuestDataBean {
 
-	private CachedRowSet rowSet;
-	MysqlDataSource dataSource = null;
-	
-	public GuestDataBean() throws Exception
-	{
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		rowSet = RowSetProvider.newFactory().createCachedRowSet();
-		rowSet.setUrl("jdbc:mysql://localhost:3306/guestbook?useTimezone=true&serverTimezone=UTC"); // Modify
-		rowSet.setUsername("root");
-		rowSet.setPassword("PLACEHOLDER"); // Hide
+	MysqlDataSource dataSource;
+	private Connection jdbcConnection;
+	private Statement statement;
+
+	public GuestDataBean() throws SQLException, IOException {
+		String defaultSQL = "SELECT firstName, lastName, email FROM guests";
+		Properties properties = new Properties();
+		FileInputStream filein = null;
+
+		dataSource = new MysqlDataSource();
 		
-		rowSet.setCommand("SELECT firstName, lastName, email FROM guests");
-		rowSet.execute();
+		// TODO: properties fileio goes here
+
+		dataSource.setUser("root");
+		dataSource.setPassword("PLACEHOLDER");
+		dataSource.setURL("jdbc:mysql://localhost:3306/guestbook?useTimezone=true&serverTimezone=UTC");
+
+		jdbcConnection = dataSource.getConnection();
+
+		statement = jdbcConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 	}
-	
-	public ArrayList<GuestBean> getGuestList() throws SQLException
-	{
-		ArrayList<GuestBean> guestList = new ArrayList<GuestBean>();
-		rowSet.beforeFirst();
+
+	protected void disconnect() throws SQLException {
 		
-		while(rowSet.next())
-		{
+        statement.close();
+		
+		if (jdbcConnection != null && !jdbcConnection.isClosed()) {
+			jdbcConnection.close();
+		}
+	}
+
+	public ArrayList<GuestBean> getGuestList() throws SQLException {
+		ArrayList<GuestBean> guestList = new ArrayList<GuestBean>();
+		
+		ResultSet res = statement.executeQuery("SELECT * FROM guests");
+		
+		while (res.next()) {
 			GuestBean guest = new GuestBean();
-			guest.setFirstName(rowSet.getString(1));
-			guest.setLastName(rowSet.getString(2));
-			guest.setEmail(rowSet.getString(3));
+			guest.setFirstName(res.getString(1));
+			guest.setLastName(res.getString(2));
+			guest.setEmail(res.getString(3));
 			guestList.add(guest);
 		}
 		return guestList;
 	}
+
+	public void addGuest(GuestBean guest) throws SQLException {
+		
+		statement.execute("INSERT INTO guests VALUES ('" + guest.getFirstName() + "', '" + guest.getLastName() + "', '" + guest.getEmail() + "')");
 	
-	public void addGuest(GuestBean guest) throws SQLException
-	{
-		rowSet.moveToInsertRow();
-		rowSet.updateString(1, guest.getFirstName());
-		rowSet.updateString(2, guest.getLastName());
-		rowSet.updateString(3, guest.getEmail());
-		rowSet.insertRow();
-		rowSet.moveToCurrentRow();
 	}
 }
