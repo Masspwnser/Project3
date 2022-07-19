@@ -18,19 +18,25 @@ public class GuestDataBean {
 	MysqlDataSource dataSource;
 	private Connection jdbcConnection;
 	private Statement statement;
+	private Exception exception;
+	private String query;
+	private String clear = "f";
 
 	public GuestDataBean() throws SQLException, IOException {
-		String defaultSQL = "SELECT firstName, lastName, email FROM guests";
-		Properties properties = new Properties();
-		FileInputStream filein = null;
+
+//		Properties properties = new Properties();
+//		FileInputStream filein = null;
+//		String propertiesFileName = "root";
+//		filein = new FileInputStream("../../../webapp/WEB-INF/lib/properties/" + propertiesFileName + ".properties");
+//    	properties.load(filein);
 
 		dataSource = new MysqlDataSource();
-		
+
 		// TODO: properties fileio goes here
 
 		dataSource.setUser("root");
-		dataSource.setPassword("PLACEHOLDER");
-		dataSource.setURL("jdbc:mysql://localhost:3306/guestbook?useTimezone=true&serverTimezone=UTC");
+		dataSource.setPassword("Placeholder");
+		dataSource.setURL("jdbc:mysql://localhost:3306/project3?useTimezone=true&serverTimezone=UTC");
 
 		jdbcConnection = dataSource.getConnection();
 
@@ -38,32 +44,71 @@ public class GuestDataBean {
 	}
 
 	protected void disconnect() throws SQLException {
-		
-        statement.close();
-		
+
+		statement.close();
+
 		if (jdbcConnection != null && !jdbcConnection.isClosed()) {
 			jdbcConnection.close();
 		}
 	}
 
-	public ArrayList<GuestBean> getGuestList() throws SQLException {
-		ArrayList<GuestBean> guestList = new ArrayList<GuestBean>();
-		
-		ResultSet res = statement.executeQuery("SELECT * FROM guests");
-		
-		while (res.next()) {
-			GuestBean guest = new GuestBean();
-			guest.setFirstName(res.getString(1));
-			guest.setLastName(res.getString(2));
-			guest.setEmail(res.getString(3));
-			guestList.add(guest);
-		}
-		return guestList;
+	public void setQuery(String query) {
+		this.query = query;
 	}
 
-	public void addGuest(GuestBean guest) throws SQLException {
-		
-		statement.execute("INSERT INTO guests VALUES ('" + guest.getFirstName() + "', '" + guest.getLastName() + "', '" + guest.getEmail() + "')");
+	public String getQuery() {
+		return this.query;
+	}
+
+	public void executeQuery() throws SQLException {
+
+		if (query == null)
+			return;
+		try {
+			statement.execute(query);
+
+		} catch (Exception e) {
+			this.exception = e;
+		}
+	}
+
+	public Statement getStatement() {
+		return this.statement;
+	}
+
+	public Exception getException() {
+		return this.exception;
+	}
 	
+	public void clearException()
+	{
+		this.exception = null;
+	}
+
+	public void setClear(String clear) {
+		System.out.println("Just got set to " + clear);
+		this.clear = clear;
+	}
+
+	public String getClear() {
+		return this.clear;
+	}
+
+	// returns:
+	// 1 for business logic
+	// 0 for not
+	// if shipment has an exception, then ignore boolean
+	public boolean addShipment(ShipmentBean shipment) throws SQLException {
+
+		// TODO: Implement business logic
+
+		try {
+			statement.execute("INSERT INTO shipments VALUES ('" + shipment.getSnum() + "', '" + shipment.getPnum()
+					+ "', '" + shipment.getJnum() + "', '" + shipment.getQuantity() + "')");
+		} catch (Exception e) {
+			shipment.setException(e);
+			return false;
+		}
+		return true;
 	}
 }

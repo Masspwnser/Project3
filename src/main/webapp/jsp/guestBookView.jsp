@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ page errorPage="guestBookErrorPage.jsp"%>
+<%@ page errorPage="errorPage.jsp"%>
 
 <%@ page import="java.util.*"%>
 <%@ page import="beans.*"%>

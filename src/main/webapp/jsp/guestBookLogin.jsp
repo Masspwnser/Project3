@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ page errorPage="guestBookErrorPage.jsp"%>
+<%@ page errorPage="errorPage.jsp"%>
 
 <jsp:useBean id="guest" scope="page" class="beans.GuestBean" />
 <jsp:useBean id="guestData" scope="page" class="beans.GuestDataBean" />
