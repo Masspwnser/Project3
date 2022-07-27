@@ -1,0 +1,39 @@
+<web-app>
+
+	<display-name>
+		CNT4714 Project 3
+	</display-name>
+
+	<servlet>
+		<servlet-name>rootUser</servlet-name>
+		<servlet-class>servlets.RootUserApp</servlet-class>
+	</servlet>
+
+		<servlet-mapping>
+			<servlet-name>rootUser</servlet-name>
+			<url-pattern>/rootUser</url-pattern>
+		</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>clientUser</servlet-name>
+		<servlet-class>servlets.ClientUserApp</servlet-class>
+	</servlet>
+
+		<servlet-mapping>
+			<servlet-name>clientUser</servlet-name>
+			<url-pattern>/clientUser</url-pattern>
+		</servlet-mapping>
+		
+	
+	<servlet>
+		<servlet-name>dataEntry</servlet-name>
+		<servlet-class>servlets.DataEntryApp</servlet-class>
+	</servlet>
+
+		<servlet-mapping>
+			<servlet-name>dataEntry</servlet-name>
+			<url-pattern>/dataEntry</url-pattern>
+		</servlet-mapping>
+
+</web-app>

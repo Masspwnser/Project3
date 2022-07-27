@@ -27,3 +27,4 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 src/main/webapp/META-INF/MANIFEST.MF
+*.properties
